@@ -2,93 +2,222 @@
 <html lang="en-us">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity WebGL Player | WebAR</title>
-    <meta name="description" content="">
+    <title>Cities</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
-	
-	
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image.prod.js"></script>
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/dist/mindar-image-aframe.prod.js"></script>
-	
   </head>
-  <body>
-    <div id="unity-container">
-      <div id="unity-canvas-container" style="width: 100%; height: 100%;">
-        <canvas id="unity-canvas" style="width: 100%; height: 100%;"></canvas>
-      </div>
+  <body>	
+	  <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas"></canvas>
       <div id="unity-loading-bar">
         <div id="unity-logo"></div>
         <div id="unity-progress-bar-empty">
           <div id="unity-progress-bar-full"></div>
         </div>
       </div>
+      <div id="unity-mobile-warning">
+        Cities does not support mobile devices yet.
+      </div>
+      <div id="unity-footer">
+      </div>
+    </div>
+	
+	<script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+        type="application/javascript"></script>
+	<script src="web3/index.js"></script>
+
     <script>
+	
+	//window.addEventListener('load', function(){
+	//	console.log("add event ethereumConnect");
+	//	ethereumConnect();
+	// });
+	
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/webar.loader.js";
+      var loaderUrl = buildUrl + "/web.asm.loader.js";
       var config = {
-        dataUrl: buildUrl + "/webar.data",
-        frameworkUrl: buildUrl + "/webar.framework.js",
-        codeUrl: buildUrl + "/webar.wasm",
+        dataUrl: buildUrl + "/web.data",
+        frameworkUrl: buildUrl + "/web.asm.framework.js",
+        codeUrl: buildUrl + "/web.asm.js",
+        memoryUrl: buildUrl + "/web.asm.mem",
         streamingAssetsUrl: "StreamingAssets",
-        companyName: "SubhradeepC",
-        productName: "WebAR",
+        companyName: "Bitbot",
+        productName: "Bitgem",
         productVersion: "0.1",
       };
 
       var container = document.querySelector("#unity-container");
       var canvas = document.querySelector("#unity-canvas");
-      var canvasContainer = document.querySelector("#unity-canvas-container");
       var loadingBar = document.querySelector("#unity-loading-bar");
       var progressBarFull = document.querySelector("#unity-progress-bar-full");
-      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
-      var unityInstance = null;
-      
+      var mobileWarning = document.querySelector("#unity-mobile-warning");
 
+      // By default Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+	
+	  var myWidth = innerWidth;
+	  var myHeight = innerHeight;
+	
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        container.className = "unity-mobile";
+        // Avoid draining fillrate performance on mobile devices,
+        // and default/override low DPI mode on mobile browsers.
+        config.devicePixelRatio = 1;
+        mobileWarning.style.display = "block";
+        setTimeout(() => {
+          mobileWarning.style.display = "none";
+        }, 5000);
+      } else {
+        canvas.style.width = myWidth + "px";
+        canvas.style.height = innerHeight + "px";
+		canvas.style.display = "table";
+      }
       loadingBar.style.display = "block";
 
+	var myGameInstance = null;
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
           progressBarFull.style.width = 100 * progress + "%";
-        }).then((instance) => {
-          unityInstance = instance;
+        }).then((unityInstance) => {
+		myGameInstance = unityInstance;
           loadingBar.style.display = "none";
-          if (fullscreenButton)
-          {
-            fullscreenButton.onclick = () => {
-              unityInstance.SetFullscreen(1);
-            };
-          }
         }).catch((message) => {
           alert(message);
         });
       };
       document.body.appendChild(script);
+	  window.addEventListener("resize", onResize);
+	  
+	  
+	  function onResize(){
+		canvas.style.width = innerWidth + "px";
+		canvas.style.height = innerHeight + "px";
+		console.log("on resize");
+	 }
 
-
+	 
+	 async function ethereumConnect(){
+		try{
+		await window.ethereum.enable();		
+		console.log("Ethereum enabled");
+		var response = callMetamask();
+		return response;
+		}
+		catch(error){
+			console.error(error);
+		}
+	 }
+	 
+	 function callMetamask(){
+		console.log("callMetamask");
+		var response = initMetamask();
+		return response;
+	 }
+	 
+	 async function initMetamask(){
+		
+		const provider = new ethers.providers.Web3Provider(window.ethereum)
+		const signer = provider.getSigner()
+		// Look up the current block number
+		await provider.getBlockNumber()
+		// 13451439		
+		// Get the balance of an account (by address or ENS name, if supported by network)
+		balance = await provider.getBalance(window.ethereum.selectedAddress)
+		// { BigNumber: "2337132817842795605" }
+		var bal = ethers.utils.formatEther(balance)
+		return bal;
+	 }
+	 
+	 async function GetWalletAddress(){
+		return window.ethereum.selectedAddress;
+	 }
+	 
+	 
+	 //Contract function
+	 async function GetContractBalance(contractAddress, abi){		
+	 
+		const provider = new ethers.providers.Web3Provider(window.ethereum)
+		const signer = provider.getSigner()
+		// Look up the current block number
+		var bl = await provider.getBlockNumber()
+		const contract = new ethers.Contract(contractAddress, abi, provider);
+		const nm = await contract.name()		
+		console.log("Contract name: "+nm);
+		// For view function
+		var result = await contract.balanceOf(window.ethereum.selectedAddress);
+		console.log("Balance of contract: "+result);
+		return result;
+	 }	 
+	 
+	 //Contract function
+	 async function TransactWithContract(contractAddress, abi, value, landType){		
+	 
+		const provider = new ethers.providers.Web3Provider(window.ethereum)
+		const signer = provider.getSigner()
+		const contract = new ethers.Contract(contractAddress, abi, signer);
+		
+		var result = "";
+		console.log("Value to mint:"+value+" Landtype:"+landType);
+		await contract.mint(window.ethereum.selectedAddress,value,landType).then ((tx) => { 
+			//const receipt = await tx.wait();
+			//console.log("Transaction confirmed in block"+receipt.blockNumber);
+			//console.log("Gas used:"+receipt.gasUsed);
+			console.log("Hash: "+tx.hash)
+			result = tx.Hash;
+		}).catch((error)=>{ 
+			if(error.code == 4001){
+				console.log("Transaction cancelled");
+				result = "Cancelled";
+				return result;
+			}
+			console.log(error)
+			result = "Error";
+		});
+		return result;
+	 }
+	 
+	 //Contract function
+	 async function GetOwnerOf(contractAddress, abi, assetId){		
+	 
+		const provider = new ethers.providers.Web3Provider(window.ethereum)
+		const signer = provider.getSigner()
+		// Look up the current block number
+		var bl = await provider.getBlockNumber()
+		const contract = new ethers.Contract(contractAddress, abi, provider);
+		const nm = await contract.name()		
+		console.log("Contract name: "+nm);
+		// For view function
+		var result = "";
+		await contract.ownerOf(assetId).then ((tx) => { 
+		console.log("Html Owner : "+tx.toString());
+		result = tx.toString();
+		}).catch((error) => {
+			
+			if(error.code == -32603){
+				console.log("Owner not found");
+				result = "Available";
+			}else{		
+				console.log("Html Owner error");
+				result = "Error";
+			}
+		});
+		return result;
+	 }
+	 
+	 
+	 
     </script>
 	
-	
-	
-	<a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/examples/image-tracking/assets/card-example/card.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-      <a-assets>
-        <img id="card" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/examples/image-tracking/assets/card-example/card.png" />
-        <a-asset-item id="avatarModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.1.4/examples/image-tracking/assets/card-example/softmind/scene.gltf"></a-asset-item>
-      </a-assets>
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-plane src="#card" position="0 0 0" height="0.552" width="1" rotation="0 0 0"></a-plane>
-        <a-gltf-model rotation="0 0 0 " position="0 0 0.1" scale="0.005 0.005 0.005" src="#avatarModel" animation="property: position; to: 0 0.1 0.1; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate">
-      </a-entity>
-    </a-scene>
 	
-	
+	<div id="unityContainer"></div>
+
   </body>
 </html>
