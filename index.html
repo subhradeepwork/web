@@ -3,7 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<<<<<<< Updated upstream
     <title>Unity WebGL Player | Cities</title>
+=======
+    <title>Unity WebGL Player | AutonomousTrafficAI</title>
+>>>>>>> Stashed changes
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
   </head>
@@ -20,10 +24,13 @@
       <div id="unity-footer">
         <div id="unity-webgl-logo"></div>
         <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">Cities</div>
+        <div id="unity-build-title">AutonomousTrafficAI</div>
       </div>
     </div>
+<<<<<<< Updated upstream
     <script src="web3/index.js"></script>
+=======
+>>>>>>> Stashed changes
     <script>
       var container = document.querySelector("#unity-container");
       var canvas = document.querySelector("#unity-canvas");
@@ -57,6 +64,7 @@
       }
 
       var buildUrl = "Build";
+<<<<<<< Updated upstream
       var loaderUrl = buildUrl + "/web.loader.js";
       var config = {
         dataUrl: buildUrl + "/web.data",
@@ -65,6 +73,16 @@
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "Cities",
+=======
+      var loaderUrl = buildUrl + "/AutoTrafficAI.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/AutoTrafficAI.data.gz",
+        frameworkUrl: buildUrl + "/AutoTrafficAI.framework.js.gz",
+        codeUrl: buildUrl + "/AutoTrafficAI.wasm.gz",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Subhradeep",
+        productName: "AutonomousTrafficAI",
+>>>>>>> Stashed changes
         productVersion: "0.1",
         showBanner: unityShowBanner,
       };
@@ -77,17 +95,39 @@
       // config.matchWebGLToCanvasSize = false;
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+<<<<<<< Updated upstream
+=======
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+>>>>>>> Stashed changes
         container.className = "unity-mobile";
-        // Avoid draining fillrate performance on mobile devices,
-        // and default/override low DPI mode on mobile browsers.
-        config.devicePixelRatio = 1;
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+
         unityShowBanner('WebGL builds are not supported on mobile devices.');
       } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
         canvas.style.width = "960px";
         canvas.style.height = "600px";
       }
+<<<<<<< Updated upstream
       loadingBar.style.display = "block";
 
+=======
+
+      loadingBar.style.display = "block";
+
+>>>>>>> Stashed changes
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
